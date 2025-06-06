@@ -39,14 +39,16 @@
       <main>
         <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
           <!-- Breadcrumb Start -->
-          <div x-data="{ pageName: `Inbox`}">
+          <div x-data="{ pageName: 'Inbox'}">
             <include src="./partials/breadcrumb.html" />
           </div>
           <!-- Breadcrumb End -->
 
-          <div class="flex gap-6">
-            <!-- Sidebar -->
-            <div class="w-80 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+          <!-- Inbox Layout Start -->
+          <div class="flex flex-col gap-6 lg:flex-row">
+            <!-- Left Sidebar - Mailbox -->
+            <div
+              class="w-full lg:w-80 rounded-2xl border border-gray-200 bg-white p-4 md:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <!-- Compose Button -->
               <button
                 class="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-medium text-white hover:bg-blue-700">
@@ -219,58 +221,75 @@
             </div>
 
             <!-- Main Content -->
-            <div class="flex-1 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+            <div
+              class="flex-1 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] mx-2 sm:mx-4 lg:mx-0">
               <!-- Header -->
-              <div class="border-b border-gray-200 p-6 dark:border-gray-800">
-                <div class="mb-4 flex items-center justify-between">
-                  <div class="flex items-center gap-4">
+              <div class="border-b border-gray-200 p-3 sm:p-4 lg:p-6 dark:border-gray-800">
+                <div class="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <!-- Action Buttons -->
+                  <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
                     <button
                       class="flex flex-row items-center justify-center gap-1 rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
                       <input type="checkbox"
-                        class="mr-4 h-5 w-5 rounded-lg border border-gray-300 text-blue-600 focus:ring-blue-500"
+                        class="mr-2 sm:mr-4 h-4 sm:h-5 w-4 sm:w-5 rounded-lg border border-gray-300 text-blue-600 focus:ring-blue-500"
                         checked />
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <svg width="20" height="20" sm:width="24" sm:height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
                         <path d="M5.75 8.875L12 15.125L18.25 8.875" stroke="#344054" stroke-width="1.5"
                           stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
                     </button>
+
+                    <!-- Refresh Button -->
                     <button
                       class="rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <svg width="20" height="20" sm:width="24" sm:height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd"
                           d="M7.99806 5.07155C9.46115 4.22683 11.1541 3.86699 12.8343 4.04358C14.5145 4.22018 16.0956 4.92415 17.3511 6.0546C18.2569 6.87022 18.9597 7.87765 19.4128 8.99618L16.28 7.93357C15.8878 7.80052 15.4619 8.01065 15.3289 8.40291C15.1958 8.79518 15.4059 9.22103 15.7982 9.35408L20.2426 10.8616C20.2906 10.8838 20.341 10.9009 20.3931 10.9126L20.5523 10.9666C20.7407 11.0305 20.9467 11.017 21.1251 10.9289C21.3035 10.8409 21.4396 10.6856 21.5035 10.4972L23.1158 5.74269C23.2488 5.35042 23.0387 4.92459 22.6464 4.79156C22.2541 4.65854 21.8283 4.8687 21.6953 5.26097L20.7014 8.19168C20.1624 6.9598 19.3649 5.84942 18.3548 4.93989C16.8639 3.59747 14.9863 2.76151 12.9911 2.5518C10.9959 2.34209 8.98548 2.76941 7.24806 3.77251C5.51063 4.77561 4.13537 6.303 3.31937 8.13575C2.50338 9.96851 2.28854 12.0126 2.70565 13.9749C3.12276 15.9373 4.15041 17.7172 5.64131 19.0596C7.13221 20.402 9.00982 21.238 11.005 21.4477C13.0002 21.6574 15.0106 21.2301 16.7481 20.227C17.1068 20.0199 17.2297 19.5612 17.0226 19.2025C16.8155 18.8438 16.3568 18.7209 15.9981 18.928C14.535 19.7727 12.842 20.1325 11.1618 19.9559C9.48165 19.7793 7.9005 19.0754 6.64501 17.9449C5.38951 16.8145 4.52412 15.3156 4.17287 13.663C3.82162 12.0105 4.00254 10.2892 4.68969 8.74586C5.37685 7.20249 6.53496 5.91627 7.99806 5.07155Z"
                           fill="#344054" />
                       </svg>
                     </button>
+
+                    <!-- Archive Button -->
                     <button
                       class="rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <svg width="20" height="20" sm:width="24" sm:height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd"
                           d="M2 5.5C2 4.25736 3.00736 3.25 4.25 3.25H19.75C20.9926 3.25 22 4.25736 22 5.5V6.5C22 7.38343 21.4909 8.14794 20.75 8.51612V18.5C20.75 19.7426 19.7426 20.75 18.5 20.75H5.5C4.25736 20.75 3.25 19.7426 3.25 18.5V8.51612C2.50914 8.14794 2 7.38343 2 6.5V5.5ZM4.75 8.75H19.25V18.5C19.25 18.9142 18.9142 19.25 18.5 19.25H5.5C5.08579 19.25 4.75 18.9142 4.75 18.5V8.75ZM20.5 6.5C20.5 6.91421 20.1642 7.25 19.75 7.25H4.25C3.83579 7.25 3.5 6.91421 3.5 6.5V5.5C3.5 5.08579 3.83579 4.75 4.25 4.75H19.75C20.1642 4.75 20.5 5.08579 20.5 5.5V6.5ZM10 11C9.58579 11 9.25 11.3358 9.25 11.75C9.25 12.1642 9.58579 12.5 10 12.5H14C14.4142 12.5 14.75 12.1642 14.75 11.75C14.75 11.3358 14.4142 11 14 11H10Z"
                           fill="#344054" />
                       </svg>
                     </button>
+
+                    <!-- Delete Button -->
                     <button
                       class="rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <svg width="20" height="20" sm:width="24" sm:height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd"
                           d="M7.99951 4.25C7.99951 3.00736 9.00687 2 10.2495 2H13.7495C14.9922 2 15.9995 3.00736 15.9995 4.25V5H18.75H19.999C20.4132 5 20.749 5.33579 20.749 5.75C20.749 6.16421 20.4132 6.5 19.999 6.5H19.5V9.89585V15.8958V19.75C19.5 20.9926 18.4926 22 17.25 22H6.75C5.50736 22 4.5 20.9926 4.5 19.75V15.8958V9.89585V6.5H4C3.58579 6.5 3.25 6.16421 3.25 5.75C3.25 5.33579 3.58579 5 4 5H5.25H7.99951V4.25ZM18 15.8958V9.89585V6.5H15.9995H15.2495H8.74951H7.99951H6V9.89585V15.8958V19.75C6 20.1642 6.33579 20.5 6.75 20.5H17.25C17.6642 20.5 18 20.1642 18 19.75V15.8958ZM9.49951 5H14.4995V4.25C14.4995 3.83579 14.1637 3.5 13.7495 3.5H10.2495C9.8353 3.5 9.49951 3.83579 9.49951 4.25V5ZM10 9.75C10.4142 9.75 10.75 10.0858 10.75 10.5V16.5C10.75 16.9142 10.4142 17.25 10 17.25C9.58579 17.25 9.25 16.9142 9.25 16.5V10.5C9.25 10.0858 9.58579 9.75 10 9.75ZM14.75 10.5C14.75 10.0858 14.4142 9.75 14 9.75C13.5858 9.75 13.25 10.0858 13.25 10.5V16.5C13.25 16.9142 13.5858 17.25 14 17.25C14.4142 17.25 14.75 16.9142 14.75 16.5V10.5Z"
                           fill="#344054" />
                       </svg>
                     </button>
+
+                    <!-- More Options Button -->
                     <button
                       class="rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <svg width="20" height="20" sm:width="24" sm:height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd"
                           d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
                           fill="#344054" />
                       </svg>
                     </button>
                   </div>
-                  <div class="mx-4 max-w-md flex-1">
+
+                  <!-- Search Bar -->
+                  <div class="w-full sm:w-auto sm:mx-4 sm:max-w-md sm:flex-1 lg:max-w-md">
                     <div class="relative">
                       <input type="text" placeholder="Search..."
-                        class="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
+                        class="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white" />
                       <svg class="absolute top-2.5 left-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -286,362 +305,365 @@
               <div class="divide-y divide-gray-200 dark:divide-gray-800">
 
                 <!-- Material UI Email -->
-
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-
-                  <button class="mr-4 text-yellow-400 hover:text-yellow-500">
-                    <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-yellow-400 hover:text-yellow-500 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 16 16" fill="currentColor">
                       <path d="M8 2L10 6H14L11 9L12 14L8 11L4 14L5 9L2 6H6L8 2Z" />
                     </svg>
-
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Material UI</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet,
-                          consectetur adipiscing elit. Sed in odio...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span
-                          class="inline-block rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-400">Important</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">12:16 pm</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Material
+                        UI</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Lorem ipsum dolor
+                        sit amet, consectetur adipiscing elit. Sed in odio...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Lorem ips...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span
+                        class="hidden sm:inline-block rounded bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-400">Important</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">12:16 pm</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Wise Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                  <input type="checkbox" class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                  <input type="checkbox"
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
                     checked />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Wise</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet
-                          consectetur adipiscing elit sed in od...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">12:16 pm</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Wise</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Lorem ipsum dolor
+                        sit amet consectetur adipiscing elit sed in od...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Lorem ipsum...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">12:16 pm</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Search Console Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Search Console</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Adipiscing dolor sit amet
-                          consectetur adipiscing elit sed in odio...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span
-                          class="inline-block rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">Social</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Apr, 24</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Search
+                        Console</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Adipiscing dolor
+                        sit amet consectetur adipiscing elit sed in odio...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Adipiscing...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span
+                        class="hidden sm:inline-block rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">Social</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Apr, 24</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- PayPal Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">PayPal</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Ipsum dolor sit amet consectetur
-                          adipiscing elit sed in odio ut nu...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Apr, 20</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">PayPal</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Ipsum dolor sit
+                        amet consectetur adipiscing elit sed in odio ut nu...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Ipsum dolor...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Apr, 20</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Google Meet Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Google Meet</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet
-                          consectetur adipiscing elit sed in od...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Apr, 16</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Google
+                        Meet</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Lorem ipsum dolor
+                        sit amet consectetur adipiscing elit sed in od...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Lorem ipsum...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Apr, 16</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Loom Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Loom</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet
-                          consectetur adipiscing elit sed in od...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Mar, 10</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Loom</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Lorem ipsum dolor
+                        sit amet consectetur adipiscing elit sed in od...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Lorem ipsum...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Mar, 10</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Airbnb Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Airbnb</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet
-                          consectetur adipiscing elit sed in od...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Mar, 05</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Airbnb</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Lorem ipsum dolor
+                        sit amet consectetur adipiscing elit sed in od...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Lorem ips...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Mar, 05</span>
                     </div>
                   </div>
                 </div>
 
-
                 <!-- Facebook Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Facebook</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet
-                          consectetur adipiscing elit sed in od...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 25</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Facebook</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Lorem ipsum dolor
+                        sit amet consectetur adipiscing elit sed in od...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Lorem ips...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 25</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Instagram Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Instagram</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet
-                          consectetur adipiscing elit sed in od...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span
-                          class="inline-block rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">Promotional</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 20</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span
+                        class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Instagram</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Lorem ipsum dolor
+                        sit amet consectetur adipiscing elit sed in od...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Lorem ips...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span
+                        class="hidden sm:inline-block rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">Promotional</span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 20</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Google Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">Google</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Dolor sit amet consectetur
-                          adipiscing elit sed in odio ut nulla co...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 02</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">Google</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Dolor sit amet
+                        consectetur adipiscing elit sed in odio ut nulla co...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Dolor sit...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 02</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- FormBold Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">FormBold</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Amet consectetur adipiscing elit
-                          sed in odio ut nulla congue ...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Jan, 22</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">FormBold</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Amet consectetur
+                        adipiscing elit sed in odio ut nulla congue ...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Amet cons...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Jan, 22</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- GrayGrids Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">GrayGrids</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Lorem ipsum dolor sit amet
-                          consectetur adipiscing elit sed in od...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 25</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span
+                        class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">GrayGrids</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Lorem ipsum dolor
+                        sit amet consectetur adipiscing elit sed in od...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Lorem ips...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 25</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- UIDeck Email -->
-                <div class="flex cursor-pointer items-center p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <div class="flex cursor-pointer items-center p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <input type="checkbox"
-                    class="mr-4 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                  <button class="mr-4 text-gray-300 hover:text-yellow-400">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    class="mr-2 sm:mr-3 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0" />
+                  <button class="mr-2 sm:mr-3 text-gray-300 hover:text-yellow-400 flex-shrink-0">
+                    <svg width="16" height="16" sm:width="20" sm:height="20" viewBox="0 0 24 24" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M12 3.00015C12.2855 3.00015 12.5462 3.16222 12.6725 3.41822L15.1786 8.49601L20.7822 9.31027C21.0648 9.35132 21.2995 9.5492 21.3877 9.82071C21.4759 10.0922 21.4023 10.3903 21.1979 10.5895L17.1431 14.542L18.1003 20.1231C18.1485 20.4044 18.0329 20.6888 17.8019 20.8566C17.5709 21.0244 17.2648 21.0465 17.0121 20.9137L12 18.2787L6.98792 20.9137C6.73523 21.0465 6.42903 21.0244 6.19807 20.8566C5.96711 20.6888 5.85145 20.4044 5.89971 20.1231L6.85693 14.542L2.80207 10.5895C2.59765 10.3903 2.52407 10.0922 2.61229 9.82071C2.70051 9.5492 2.93522 9.35132 3.21773 9.31027L8.8214 8.49601L11.3274 3.41822C11.4538 3.16222 11.7145 3.00015 12 3.00015ZM12 5.44481L9.992 9.51344C9.88276 9.73479 9.67158 9.88822 9.4273 9.92372L4.9373 10.5762L8.1863 13.7431C8.36306 13.9154 8.44372 14.1637 8.40199 14.407L7.63501 18.8788L11.651 16.7675C11.8695 16.6526 12.1305 16.6526 12.349 16.7675L16.365 18.8788L15.598 14.407C15.5563 14.1637 15.6369 13.9154 15.8137 13.7431L19.0627 10.5762L14.5727 9.92372C14.3284 9.88822 14.1172 9.73479 14.008 9.51344L12 5.44481Z"
                         fill="#344054" />
                     </svg>
                   </button>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-3">
-                        <span class="text-sm font-medium text-gray-900 dark:text-white">UIDeck</span>
-                        <span class="truncate text-sm text-gray-500 dark:text-gray-400">Sit amet consectetur adipiscing
-                          elit sed in odio ut nulla congue ...</span>
-                      </div>
-                      <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 15</span>
-                      </div>
+                  <div class="min-w-0 flex-1 flex items-center justify-between">
+                    <div class="flex items-center min-w-0 flex-1">
+                      <span class="text-sm font-medium text-gray-900 dark:text-white flex-shrink-0 mr-2">UIDeck</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Sit amet
+                        consectetur adipiscing elit sed in odio ut nulla congue ...</span>
+                      <span class="truncate text-xs text-gray-500 dark:text-gray-400 sm:hidden">Sit amet...</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 ml-2">
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Feb, 15</span>
                     </div>
                   </div>
                 </div>
-              </div>
 
 
-              <!-- Pagination -->
-              <div class="flex items-center justify-between border-t border-gray-200 p-6 dark:border-gray-800">
-                <span class="text-sm text-gray-500 dark:text-gray-400">Showing 1 of 150</span>
-                <div class="flex items-center space-x-2">
-                  <button
-                    class="rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M15.25 6L9 12.25L15.25 18.5" stroke="#344054" stroke-width="1.5" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    </svg>
-                  </button>
-                  <button
-                    class="rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M8.75 19L15 12.75L8.75 6.5" stroke="#344054" stroke-width="1.5" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    </svg>
-                  </button>
 
+                <!-- Pagination -->
+                <div class="flex items-center justify-between border-t border-gray-200 p-6 dark:border-gray-800">
+                  <span class="text-sm text-gray-500 dark:text-gray-400">Showing 1 of 150</span>
+                  <div class="flex items-center space-x-2">
+                    <button
+                      class="rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.25 6L9 12.25L15.25 18.5" stroke="#344054" stroke-width="1.5" stroke-linecap="round"
+                          stroke-linejoin="round" />
+                      </svg>
+                    </button>
+                    <button
+                      class="rounded-lg border border-gray-100 bg-gray-50 p-2 hover:bg-gray-200 dark:border-gray-800 dark:bg-white/[0.02] dark:hover:bg-white/[0.04]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.75 19L15 12.75L8.75 6.5" stroke="#344054" stroke-width="1.5" stroke-linecap="round"
+                          stroke-linejoin="round" />
+                      </svg>
+                    </button>
+
+                  </div>
                 </div>
               </div>
+            </div>
+            <!-- ===== Inbox End ===== -->
       </main>
       <!-- ===== Main Content End ===== -->
     </div>
