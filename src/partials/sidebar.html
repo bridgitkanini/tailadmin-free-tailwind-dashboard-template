@@ -598,6 +598,50 @@
           </li>
           <!-- Menu Item Inbox -->
 
+          <!-- NEW: Direct Inbox Link -->
+          <li>
+            <a
+              href="inbox.html"
+              @click="selected = (selected === 'DirectInbox' ? '':'DirectInbox')"
+              class="menu-item group"
+              :class=" (selected === 'DirectInbox') && (page === 'inbox') ? 'menu-item-active' : 'menu-item-inactive'"
+            >
+              <svg
+                :class="(selected === 'DirectInbox') && (page === 'inbox') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <polyline
+                  points="22,6 12,13 2,6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+
+              <span
+                class="menu-item-text"
+                :class="sidebarToggle ? 'lg:hidden' : ''"
+              >
+                Inbox
+              </span>
+            </a>
+          </li>
+          <!-- End Direct Inbox Link -->
+
           <!-- Menu Item Invoice -->
           <li>
             <a
