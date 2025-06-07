@@ -13,11 +13,11 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
     <style>
         .ql-editor {
-            min-height: 300px;
+            min-height: 200px;
         }
 
         .placeholder-btn {
-            @apply bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm hover:bg-blue-200 cursor-pointer;
+            @apply bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs sm:text-sm hover:bg-blue-200 cursor-pointer;
         }
 
         .preview-placeholder {
@@ -48,71 +48,154 @@
         /* Ensure editor container has proper width */
         #editor-container {
             width: 100%;
-            min-width: 500px;
+            min-width: 280px;
         }
 
         /* Prevent duplicate toolbars */
         .editor-wrapper .ql-toolbar:not(:first-child) {
             display: none;
         }
+
+        /* Mobile sidebar overlay */
+        @media (max-width: 768px) {
+            .mobile-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 50;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .mobile-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+            }
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 640px) {
+            .ql-toolbar {
+                padding: 4px;
+            }
+
+            .ql-toolbar .ql-formats {
+                margin-right: 8px;
+            }
+
+            .ql-editor {
+                min-height: 150px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 
 <body x-data="emailTemplateApp()" x-init="init()" :class="{'dark bg-gray-900': darkMode}">
+    <!-- Mobile overlay -->
+    <div x-show="mobileMenuOpen" @click="mobileMenuOpen = false" class="mobile-overlay md:hidden"
+        x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+
     <!-- Page Wrapper -->
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar placeholder -->
-        <div class="w-64 bg-gray-800 text-white p-4">
-            <h2 class="text-xl font-bold mb-4">TailAdmin</h2>
-            <nav>
-                <a href="#" class="block py-2 px-4 hover:bg-gray-700 rounded">Dashboard</a>
-                <a href="#" class="block py-2 px-4 hover:bg-gray-700 rounded bg-gray-700">Email Templates</a>
-                <a href="#" class="block py-2 px-4 hover:bg-gray-700 rounded">Inbox</a>
-            </nav>
+        <!-- Mobile Sidebar -->
+        <div class="mobile-sidebar md:relative md:translate-x-0 w-64 bg-gray-800 text-white"
+            :class="{'open': mobileMenuOpen}">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold">TailAdmin</h2>
+                    <button @click="mobileMenuOpen = false" class="md:hidden text-white hover:text-gray-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <nav class="space-y-2">
+                    <a href="#" class="block py-2 px-4 hover:bg-gray-700 rounded">Dashboard</a>
+                    <a href="#" class="block py-2 px-4 hover:bg-gray-700 rounded bg-gray-700">Email Templates</a>
+                    <a href="#" class="block py-2 px-4 hover:bg-gray-700 rounded">Inbox</a>
+                </nav>
+            </div>
         </div>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header -->
-            <header class="bg-white border-b border-gray-200 px-6 py-4">
+            <header class="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
                 <div class="flex items-center justify-between">
-                    <h1 class="text-2xl font-semibold text-gray-900">Email Template Editor</h1>
                     <div class="flex items-center gap-4">
+                        <button @click="mobileMenuOpen = true" class="md:hidden text-gray-600 hover:text-gray-900">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-lg sm:text-2xl font-semibold text-gray-900">Email Template Editor</h1>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-4">
                         <button @click="showPreview = !showPreview"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            class="hidden sm:inline-flex bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
                             <span x-text="showPreview ? 'Hide Preview' : 'Show Preview'"></span>
                         </button>
+                        <button @click="showPreview = !showPreview"
+                            class="sm:hidden bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                </path>
+                            </svg>
+                        </button>
                         <button @click="saveTemplate()"
-                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                            Save Template
+                            class="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 text-sm">
+                            <span class="hidden sm:inline">Save</span>
+                            <svg class="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12">
+                                </path>
+                            </svg>
                         </button>
                     </div>
                 </div>
             </header>
 
             <!-- Main Content Area -->
-            <main class="flex-1 overflow-auto p-6">
+            <main class="flex-1 overflow-auto p-4 sm:p-6">
                 <div class="max-w-7xl mx-auto">
                     <!-- Template Selection -->
-                    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Template Settings</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Template Name</label>
                                 <input type="text" x-model="templateData.name"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                     placeholder="Enter template name">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Subject Line</label>
                                 <input type="text" x-model="templateData.subject"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                     placeholder="Email subject">
                             </div>
-                            <div>
+                            <div class="sm:col-span-2 lg:col-span-1">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Default Template</label>
                                 <select @change="loadDefaultTemplate($event.target.value)"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
                                     <option value="">Select a default template</option>
                                     <option value="welcome">Welcome Email</option>
                                     <option value="rejection">Rejection Email</option>
@@ -122,21 +205,39 @@
                         </div>
                     </div>
 
+                    <!-- Mobile Tab Navigation -->
+                    <div class="lg:hidden mb-6">
+                        <div class="flex bg-gray-100 rounded-lg p-1">
+                            <button @click="activeTab = 'editor'"
+                                :class="activeTab === 'editor' ? 'bg-white shadow' : 'text-gray-600'"
+                                class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors">
+                                Editor
+                            </button>
+                            <button @click="activeTab = 'preview'"
+                                :class="activeTab === 'preview' ? 'bg-white shadow' : 'text-gray-600'"
+                                class="flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors">
+                                Preview
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Editor Section -->
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 overflow-x-auto">
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 overflow-x-auto"
+                            :class="{'hidden lg:block': activeTab !== 'editor'}">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-semibold text-gray-900">Template Editor</h3>
                                 <button @click="showPlaceholders = !showPlaceholders"
-                                    class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                    <span x-text="showPlaceholders ? 'Hide Placeholders' : 'Show Placeholders'"></span>
+                                    class="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium">
+                                    <span x-text="showPlaceholders ? 'Hide' : 'Show'"></span>
+                                    <span class="hidden sm:inline">Placeholders</span>
                                 </button>
                             </div>
 
                             <!-- Placeholders Panel -->
-                            <div x-show="showPlaceholders" x-transition class="mb-4 p-4 bg-gray-50 rounded-lg">
+                            <div x-show="showPlaceholders" x-transition class="mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
                                 <h4 class="text-sm font-medium text-gray-700 mb-3">Available Placeholders</h4>
-                                <div class="flex flex-wrap gap-2 mb-3">
+                                <div class="flex flex-wrap gap-1 sm:gap-2 mb-3">
                                     <template x-for="placeholder in availablePlaceholders" :key="placeholder.key">
                                         <button @click="insertPlaceholder(placeholder)" class="placeholder-btn"
                                             x-text="placeholder.label"></button>
@@ -144,7 +245,7 @@
                                 </div>
                                 <div class="border-t pt-3">
                                     <h5 class="text-sm font-medium text-gray-700 mb-2">Attachment Placeholders</h5>
-                                    <div class="flex flex-wrap gap-2">
+                                    <div class="flex flex-wrap gap-1 sm:gap-2">
                                         <button @click="insertPlaceholder({key: 'attachment1', label: '[attachment1]'})"
                                             class="placeholder-btn">[attachment1]</button>
                                         <button @click="insertPlaceholder({key: 'attachment2', label: '[attachment2]'})"
@@ -152,13 +253,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Debug Info -->
-                            <!-- <div class="mb-4 p-2 bg-yellow-50 rounded text-sm">
-                                <p><strong>Debug:</strong> Quill initialized: <span
-                                        x-text="quill ? 'Yes' : 'No'"></span></p>
-                                <p><strong>Editor ready:</strong> <span x-text="editorReady ? 'Yes' : 'No'"></span></p>
-                            </div> -->
 
                             <!-- Quill Editor -->
                             <div class="editor-wrapper">
@@ -173,7 +267,7 @@
                                 </label>
                                 <div x-show="templateData.includeSignature" x-transition>
                                     <textarea x-model="templateData.signature"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                         rows="3" placeholder="Enter your signature"></textarea>
                                 </div>
                             </div>
@@ -181,27 +275,28 @@
                             <!-- Attachment Upload -->
                             <div class="border-t pt-4 mt-4">
                                 <h4 class="text-sm font-medium text-gray-700 mb-3">Attachments</h4>
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4 text-center">
                                     <input type="file" id="attachment-upload" multiple class="hidden"
                                         @change="handleFileUpload($event)">
                                     <label for="attachment-upload" class="cursor-pointer">
                                         <div class="text-gray-500">
-                                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor"
-                                                fill="none" viewBox="0 0 48 48">
+                                            <svg class="mx-auto h-8 sm:h-12 w-8 sm:w-12 text-gray-400"
+                                                stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                                 <path
                                                     d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
                                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                             </svg>
-                                            <p class="mt-2 text-sm">Click to upload files or drag and drop</p>
+                                            <p class="mt-2 text-xs sm:text-sm">Click to upload or drag and drop</p>
                                         </div>
                                     </label>
                                 </div>
                                 <div x-show="attachments.length > 0" class="mt-3">
                                     <template x-for="(file, index) in attachments" :key="index">
                                         <div class="flex items-center justify-between bg-gray-50 p-2 rounded mb-2">
-                                            <span class="text-sm text-gray-700" x-text="file.name"></span>
+                                            <span class="text-xs sm:text-sm text-gray-700 truncate"
+                                                x-text="file.name"></span>
                                             <button @click="removeAttachment(index)"
-                                                class="text-red-600 hover:text-red-800">
+                                                class="text-red-600 hover:text-red-800 ml-2 flex-shrink-0">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -215,14 +310,30 @@
                         </div>
 
                         <!-- Preview Section -->
-                        <div x-show="showPreview" x-transition class="bg-white rounded-xl border border-gray-200 p-6">
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6"
+                            :class="{'hidden lg:block': activeTab !== 'preview'}">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Live Preview</h3>
 
                             <!-- Preview Controls -->
-                            <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
                                 <h4 class="text-sm font-medium text-gray-700 mb-3">Test Data</h4>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <template x-for="placeholder in availablePlaceholders" :key="placeholder.key">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <template x-for="placeholder in availablePlaceholders.slice(0, 6)"
+                                        :key="placeholder.key">
+                                        <div>
+                                            <label class="block text-xs text-gray-600"
+                                                x-text="placeholder.label"></label>
+                                            <input type="text" x-model="testData[placeholder.key]"
+                                                class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                                :placeholder="placeholder.label">
+                                        </div>
+                                    </template>
+                                </div>
+                                <!-- Show remaining placeholders on larger screens -->
+                                <div class="hidden sm:grid sm:grid-cols-2 gap-3 mt-3"
+                                    x-show="availablePlaceholders.length > 6">
+                                    <template x-for="placeholder in availablePlaceholders.slice(6)"
+                                        :key="placeholder.key">
                                         <div>
                                             <label class="block text-xs text-gray-600"
                                                 x-text="placeholder.label"></label>
@@ -233,26 +344,27 @@
                                     </template>
                                 </div>
                                 <button @click="updatePreview()"
-                                    class="mt-3 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                    class="mt-3 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 w-full sm:w-auto">
                                     Update Preview
                                 </button>
                             </div>
 
                             <!-- Email Preview -->
                             <div class="border border-gray-300 rounded-lg overflow-hidden">
-                                <div class="bg-gray-100 px-4 py-2 border-b">
-                                    <div class="text-sm text-gray-600">
-                                        <div><strong>Subject:</strong> <span
+                                <div class="bg-gray-100 px-3 sm:px-4 py-2 border-b">
+                                    <div class="text-xs sm:text-sm text-gray-600 space-y-1">
+                                        <div class="truncate"><strong>Subject:</strong> <span
                                                 x-text="replacePlaceholders(templateData.subject)"></span></div>
-                                        <div><strong>From:</strong> noreply@company.com</div>
-                                        <div><strong>To:</strong> recipient@example.com</div>
+                                        <div class="truncate"><strong>From:</strong> noreply@company.com</div>
+                                        <div class="truncate"><strong>To:</strong> recipient@example.com</div>
                                     </div>
                                 </div>
-                                <div class="p-4 bg-white min-h-96">
-                                    <div id="preview-content" class="prose max-w-none"></div>
+                                <div class="p-3 sm:p-4 bg-white min-h-64 sm:min-h-96">
+                                    <div id="preview-content"
+                                        class="prose prose-sm sm:prose max-w-none text-sm sm:text-base"></div>
                                     <div x-show="templateData.includeSignature && templateData.signature"
                                         class="mt-6 pt-4 border-t border-gray-200">
-                                        <div class="text-gray-700 whitespace-pre-line"
+                                        <div class="text-gray-700 whitespace-pre-line text-sm"
                                             x-text="replacePlaceholders(templateData.signature)"></div>
                                     </div>
                                 </div>
@@ -261,13 +373,13 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="mt-6 flex justify-end gap-4">
+                    <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
                         <button @click="sendTestEmail()"
-                            class="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700">
+                            class="bg-yellow-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-yellow-700 text-sm sm:text-base order-2 sm:order-1">
                             Send Test Email
                         </button>
                         <button @click="saveTemplate()"
-                            class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            class="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-green-700 text-sm sm:text-base order-1 sm:order-2">
                             Save Template
                         </button>
                     </div>
