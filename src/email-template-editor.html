@@ -49,7 +49,11 @@
         #editor-container {
             width: 100%;
             min-width: 500px;
-            /* Minimum width to prevent toolbar wrapping */
+        }
+
+        /* Prevent duplicate toolbars */
+        .editor-wrapper .ql-toolbar:not(:first-child) {
+            display: none;
         }
     </style>
 </head>
@@ -150,14 +154,16 @@
                             </div>
 
                             <!-- Debug Info -->
-                            <div class="mb-4 p-2 bg-yellow-50 rounded text-sm">
-                                <p><strong>Debug:</strong> Editor containers found: <span x-text="editorCount"></span>
-                                </p>
-                                <p><strong>Quill initialized:</strong> <span x-text="quill ? 'Yes' : 'No'"></span></p>
-                            </div>
+                            <!-- <div class="mb-4 p-2 bg-yellow-50 rounded text-sm">
+                                <p><strong>Debug:</strong> Quill initialized: <span
+                                        x-text="quill ? 'Yes' : 'No'"></span></p>
+                                <p><strong>Editor ready:</strong> <span x-text="editorReady ? 'Yes' : 'No'"></span></p>
+                            </div> -->
 
                             <!-- Quill Editor -->
-                            <div id="editor-container" class="mb-4"></div>
+                            <div class="editor-wrapper">
+                                <div id="editor-container" class="mb-4"></div>
+                            </div>
 
                             <!-- Signature Section -->
                             <div class="border-t pt-4">
@@ -277,7 +283,7 @@
                 showPreview: true,
                 showPlaceholders: true,
                 quill: null,
-                editorCount: 0,
+                editorReady: false,
                 templateData: {
                     name: '',
                     subject: '',
@@ -346,37 +352,38 @@
                 },
 
                 init() {
-                    // Add delay to ensure DOM is fully loaded
-                    setTimeout(() => {
-                        this.checkEditorContainers();
-                        this.initQuill();
-                        this.updatePreview();
-                    }, 100);
-                },
-
-                checkEditorContainers() {
-                    this.editorCount = document.querySelectorAll('#editor-container').length;
-                    console.log('Editor containers found:', this.editorCount);
-
-                    // Check for any existing Quill instances
-                    const existingQuill = document.querySelectorAll('.ql-container').length;
-                    console.log('Existing Quill instances:', existingQuill);
+                    // Wait for DOM to be fully loaded and AlpineJS to be ready
+                    this.$nextTick(() => {
+                        // Additional delay to ensure all resources are loaded
+                        setTimeout(() => {
+                            this.initQuill();
+                        }, 200);
+                    });
                 },
 
                 initQuill() {
                     console.log('Initializing Quill...');
 
-                    // Clear any existing Quill instances
-                    const container = document.getElementById('editor-container');
-                    if (container) {
-                        container.innerHTML = ''; // Clear any existing content
-                    }
-
                     // Check if Quill is already initialized
                     if (this.quill) {
-                        console.log('Quill already initialized, skipping...');
+                        console.log('Quill already initialized, destroying first...');
+                        // Clean up existing instance
+                        const container = document.getElementById('editor-container');
+                        if (container) {
+                            container.innerHTML = '';
+                        }
+                        this.quill = null;
+                    }
+
+                    // Ensure the container exists and is empty
+                    const container = document.getElementById('editor-container');
+                    if (!container) {
+                        console.error('Editor container not found');
                         return;
                     }
+
+                    // Clear any existing Quill content
+                    container.innerHTML = '';
 
                     try {
                         this.quill = new Quill('#editor-container', {
@@ -394,25 +401,30 @@
                             }
                         });
 
+                        // Set up event listener for content changes
                         this.quill.on('text-change', () => {
                             this.templateData.content = this.quill.root.innerHTML;
                             this.updatePreview();
                         });
 
+                        this.editorReady = true;
                         console.log('Quill initialized successfully');
+
+                        // Initial preview update
+                        this.updatePreview();
+
                     } catch (error) {
                         console.error('Error initializing Quill:', error);
+                        this.editorReady = false;
                     }
                 },
 
                 insertPlaceholder(placeholder) {
-                    if (this.quill) {
+                    if (this.quill && this.editorReady) {
                         const range = this.quill.getSelection();
-                        if (range) {
-                            this.quill.insertText(range.index, placeholder.label);
-                        } else {
-                            this.quill.insertText(0, placeholder.label);
-                        }
+                        const index = range ? range.index : this.quill.getLength();
+                        this.quill.insertText(index, placeholder.label + ' ');
+                        this.quill.setSelection(index + placeholder.label.length + 1);
                     }
                 },
 
@@ -425,11 +437,11 @@
                     this.templateData.signature = template.signature;
                     this.templateData.includeSignature = true;
 
-                    if (this.quill) {
+                    if (this.quill && this.editorReady) {
                         this.quill.root.innerHTML = template.content;
                         this.templateData.content = template.content;
+                        this.updatePreview();
                     }
-                    this.updatePreview();
                 },
 
                 replacePlaceholders(text) {
@@ -444,10 +456,12 @@
                 },
 
                 updatePreview() {
-                    const previewElement = document.getElementById('preview-content');
-                    if (previewElement && this.templateData.content) {
-                        previewElement.innerHTML = this.replacePlaceholders(this.templateData.content);
-                    }
+                    this.$nextTick(() => {
+                        const previewElement = document.getElementById('preview-content');
+                        if (previewElement && this.templateData.content) {
+                            previewElement.innerHTML = this.replacePlaceholders(this.templateData.content);
+                        }
+                    });
                 },
 
                 handleFileUpload(event) {
@@ -467,6 +481,11 @@
                 },
 
                 async saveTemplate() {
+                    if (!this.templateData.name.trim()) {
+                        alert('Please enter a template name');
+                        return;
+                    }
+
                     const templatePayload = {
                         name: this.templateData.name,
                         subject: this.templateData.subject,
@@ -496,6 +515,11 @@
                 },
 
                 async sendTestEmail() {
+                    if (!this.templateData.content.trim()) {
+                        alert('Please add some content to the email template');
+                        return;
+                    }
+
                     const emailPayload = {
                         templateId: 'temp_' + Date.now(),
                         recipient: 'test@example.com',
