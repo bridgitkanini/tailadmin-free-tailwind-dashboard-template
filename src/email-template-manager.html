@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
+    <style>
+        .ql-editor {
+            min-height: 300px;
+        }
+
+        .template-card {
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .placeholder-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .placeholder-tag:hover {
+            transform: scale(1.05);
+        }
+
+        .recipient-card {
+            border-left: 4px solid #10b981;
+        }
+
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+        }
+
+        .api-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body x-data="emailTemplateManager()" x-init="init()" class="bg-gray-50">
+    <!-- API Status Indicator -->
+    <div class="api-status">
+        <div x-show="isLoading" class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+            Loading...
+        </div>
+        <div x-show="apiError" class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
+            API Error
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <h1 class="text-2xl font-bold text-gray-900">Email Template Manager</h1>
+                <div class="flex gap-3">
+                    <button @click="showBulkEmail = true"
+                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                        Bulk Email
+                    </button>
+                    <button @click="createNewTemplate()"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        + New Template
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Template List Sidebar -->
+            <div class="col-span-12 lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <h2 class="text-lg font-semibold mb-4">Templates</h2>
+
+                    <!-- Module/Category Filter -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Module</label>
+                        <select x-model="selectedModule" @change="filterTemplates()"
+                            class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Modules</option>
+                            <template x-for="module in availableModules" :key="module">
+                                <option :value="module" x-text="module"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Search Templates -->
+                    <div class="mb-4">
+                        <input type="text" x-model="templateSearch" @input="filterTemplates()"
+                            placeholder="Search templates..."
+                            class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Template List -->
+                    <div class="space-y-3 max-h-96 overflow-y-auto">
+                        <template x-for="template in filteredTemplates" :key="template.id">
+                            <div class="template-card bg-gray-50 p-3 rounded-lg cursor-pointer"
+                                @click="selectTemplate(template)"
+                                :class="{'ring-2 ring-blue-500 bg-blue-50': selectedTemplate?.id === template.id}">
+                                <h3 class="font-medium text-sm" x-text="template.name"></h3>
+                                <p class="text-xs text-gray-500 mt-1" x-text="template.category"></p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-xs text-gray-400" x-text="formatDate(template.updatedAt)"></span>
+                                    <div class="flex gap-1">
+                                        <button @click.stop="editTemplate(template)"
+                                            class="text-blue-600 hover:text-blue-800 text-xs">Edit</button>
+                                        <button @click.stop="cloneTemplate(template)"
+                                            class="text-green-600 hover:text-green-800 text-xs">Clone</button>
+                                        <button @click.stop="deleteTemplate(template.id)"
+                                            class="text-red-600 hover:text-red-800 text-xs">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div x-show="filteredTemplates.length === 0" class="text-center py-8 text-gray-500">
+                            No templates found
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Section -->
+            <div class="col-span-12 lg:col-span-6">
+                <div class="bg-white rounded-lg shadow-sm">
+                    <!-- Template Details -->
+                    <div class="p-4 border-b">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Template Name</label>
+                                <input type="text" x-model="currentTemplate.name"
+                                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter template name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Module</label>
+                                <select x-model="currentTemplate.category"
+                                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                    <template x-for="module in availableModules" :key="module">
+                                        <option :value="module" x-text="module"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Subject Line</label>
+                            <input type="text" x-model="currentTemplate.subject" @input="updatePreview()"
+                                class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                placeholder="Email subject with placeholders like ${firstName}">
+                        </div>
+                    </div>
+
+                    <!-- Editor Tabs -->
+                    <div class="border-b">
+                        <nav class="flex space-x-8 px-4">
+                            <button @click="switchEditorMode('wysiwyg')"
+                                :class="editorMode === 'wysiwyg' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
+                                class="py-2 px-1 border-b-2 font-medium text-sm">
+                                WYSIWYG Editor
+                            </button>
+                            <button @click="switchEditorMode('html')"
+                                :class="editorMode === 'html' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
+                                class="py-2 px-1 border-b-2 font-medium text-sm">
+                                HTML Source
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Editor Content -->
+                    <div class="p-4">
+                        <!-- WYSIWYG Editor -->
+                        <div x-show="editorMode === 'wysiwyg'">
+                            <div id="quill-editor"></div>
+                        </div>
+
+                        <!-- HTML Source Editor -->
+                        <div x-show="editorMode === 'html'">
+                            <textarea x-model="currentTemplate.content" @input="updatePreview()"
+                                class="w-full h-80 p-3 border border-gray-300 rounded-md font-mono text-sm"
+                                placeholder="HTML content with placeholders like ${firstName}"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder Section -->
+                    <div class="p-4 border-t bg-gray-50">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-medium text-gray-900">Placeholders</h3>
+                            <div class="flex gap-2">
+                                <input type="text" x-model="placeholderSearch" placeholder="Search placeholders..."
+                                    class="px-3 py-1 text-sm border rounded-md">
+                                <button @click="refreshPlaceholders()"
+                                    class="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded-md">
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                            <template x-for="placeholder in filteredPlaceholders" :key="placeholder.key">
+                                <span class="placeholder-tag" @click="insertPlaceholder(placeholder)"
+                                    :title="placeholder.description" x-text="placeholder.label"></span>
+                            </template>
+                        </div>
+                        <div x-show="filteredPlaceholders.length === 0" class="text-sm text-gray-500 py-2">
+                            No placeholders found
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="p-4 border-t flex justify-between">
+                        <div class="flex gap-2">
+                            <button @click="previewTemplate()"
+                                class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                                Preview
+                            </button>
+                            <button @click="sendTestEmail()"
+                                class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700">
+                                Send Test
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button @click="saveTemplate()" :disabled="!currentTemplate.name.trim()"
+                                :class="!currentTemplate.name.trim() ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'"
+                                class="text-white px-4 py-2 rounded-lg transition-colors">
+                                Save Template
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="col-span-12 lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <h2 class="text-lg font-semibold mb-4">Live Preview</h2>
+
+                    <!-- Test Data -->
+                    <div class="mb-4">
+                        <h3 class="font-medium text-sm mb-2">Sample Data</h3>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                            <template x-for="(value, key) in sampleData" :key="key">
+                                <div class="flex flex-col">
+                                    <label class="text-xs text-gray-600" x-text="key"></label>
+                                    <input type="text" x-model="sampleData[key]" @input="updatePreview()"
+                                        class="px-2 py-1 text-xs border rounded">
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Email Preview -->
+                    <div class="border rounded-lg overflow-hidden">
+                        <div class="bg-gray-100 px-3 py-2 text-xs">
+                            <div><strong>Subject:</strong> <span
+                                    x-text="replacePlaceholders(currentTemplate.subject)"></span></div>
+                            <div><strong>To:</strong> recipient@example.com</div>
+                        </div>
+                        <div class="p-3 bg-white min-h-64 text-sm overflow-auto" id="preview-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Email Modal -->
+    <div x-show="showBulkEmail" class="fixed inset-0 z-50 overflow-y-auto modal-backdrop"
+        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click.self="showBulkEmail = false">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Bulk Email Campaign</h3>
+
+                    <div class="grid grid-cols-3 gap-6">
+                        <!-- Campaign Settings -->
+                        <div>
+                            <h4 class="font-medium mb-3">Campaign Settings</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Template</label>
+                                    <select x-model="bulkTemplate" @change="updateBulkPreview()"
+                                        class="w-full p-2 border border-gray-300 rounded-md">
+                                        <option value="">Select Template</option>
+                                        <template x-for="template in templates" :key="template.id">
+                                            <option :value="template.id" x-text="template.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Campaign Name</label>
+                                    <input type="text" x-model="bulkCampaignName"
+                                        class="w-full p-2 border border-gray-300 rounded-md"
+                                        placeholder="Enter campaign name">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Send Schedule</label>
+                                    <select x-model="bulkSchedule" class="w-full p-2 border border-gray-300 rounded-md">
+                                        <option value="now">Send Now</option>
+                                        <option value="scheduled">Schedule for Later</option>
+                                    </select>
+                                </div>
+                                <div x-show="bulkSchedule === 'scheduled'">
+                                    <input type="datetime-local" x-model="bulkScheduleTime"
+                                        class="w-full p-2 border border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recipients Section -->
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-medium">Recipients</h4>
+                                <button @click="importRecipients()"
+                                    class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                    Import CSV
+                                </button>
+                            </div>
+                            <div class="space-y-3 max-h-96 overflow-y-auto">
+                                <template x-for="(recipient, index) in bulkRecipients" :key="index">
+                                    <div class="recipient-card bg-gray-50 p-3 rounded-lg">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <input type="text" x-model="recipient.name"
+                                                    class="font-medium text-sm w-full bg-transparent border-none p-0"
+                                                    placeholder="Recipient name">
+                                                <input type="email" x-model="recipient.email"
+                                                    class="text-xs text-gray-600 w-full bg-transparent border-none p-0 mt-1"
+                                                    placeholder="email@example.com">
+                                            </div>
+                                            <button @click="removeRecipient(index)"
+                                                class="text-red-600 hover:text-red-800 text-xs ml-2">Remove</button>
+                                        </div>
+                                        <!-- Dynamic fields for recipient data -->
+                                        <div class="mt-2 space-y-1">
+                                            <template x-for="placeholder in placeholders.slice(0, 3)"
+                                                :key="placeholder.key">
+                                                <input type="text" x-model="recipient[placeholder.key]"
+                                                    :placeholder="placeholder.label"
+                                                    class="text-xs w-full p-1 border rounded"
+                                                    @input="updateBulkPreview()">
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="mt-4">
+                                <button @click="addRecipient()"
+                                    class="w-full border-2 border-dashed border-gray-300 p-3 rounded-lg text-sm text-gray-600 hover:border-gray-400">
+                                    + Add Recipient
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div>
+                            <h4 class="font-medium mb-3">Email Preview</h4>
+                            <div class="mb-3">
+                                <select x-model="previewRecipient" @change="updateBulkPreview()"
+                                    class="w-full p-2 text-sm border border-gray-300 rounded-md">
+                                    <option value="">Select recipient for preview</option>
+                                    <template x-for="(recipient, index) in bulkRecipients" :key="index">
+                                        <option :value="index" x-text="recipient.name || 'Recipient ' + (index + 1)">
+                                        </option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div class="border rounded-lg overflow-hidden">
+                                <div class="bg-gray-100 px-3 py-2 text-xs">
+                                    <div><strong>Subject:</strong> <span x-text="getBulkPreviewSubject()"></span></div>
+                                    <div><strong>To:</strong> <span x-text="getBulkPreviewEmail()"></span></div>
+                                </div>
+                                <div class="p-3 bg-white h-64 text-sm overflow-auto" id="bulk-preview-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="sendBulkEmail()" :disabled="!bulkTemplate || bulkRecipients.length === 0"
+                        :class="!bulkTemplate || bulkRecipients.length === 0 ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm">
+                        Send Campaign
+                    </button>
+                    <button @click="showBulkEmail = false"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Confirmation Modal -->
+    <div x-show="showSaveModal" class="fixed inset-0 z-50 overflow-y-auto modal-backdrop" x-transition>
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" @click="showSaveModal = false"></div>
+
+            <div
+                class="inline-block bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Save Template</h3>
+                    <div x-show="!currentTemplate.id">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Template Name</label>
+                        <input type="text" x-model="saveModalName" class="w-full p-2 border border-gray-300 rounded-md"
+                            placeholder="Enter template name">
+                    </div>
+                    <div x-show="currentTemplate.id">
+                        <p>Are you sure you want to save changes to "<span x-text="currentTemplate.name"></span>"?</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="confirmSave()"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 sm:ml-3 sm:w-auto sm:text-sm">
+                        Save
+                    </button>
+                    <button @click="showSaveModal = false"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function emailTemplateManager() {
+            return {
+                // State
+                templates: [],
+                filteredTemplates: [],
+                selectedTemplate: null,
+                currentTemplate: {
+                    id: null,
+                    name: '',
+                    subject: '',
+                    content: '',
+                    category: 'HR',
+                    signature: '',
+                    isActive: true
+                },
+                selectedModule: '',
+                templateSearch: '',
+                editorMode: 'wysiwyg',
+                quill: null,
+                showBulkEmail: false,
+                showSaveModal: false,
+                saveModalName: '',
+                isLoading: false,
+                apiError: false,
+
+                // Available modules
+                availableModules: ['HR', 'Recruitment', 'Marketing', 'Support', 'Sales', 'Legal'],
+
+                // Placeholders
+                placeholders: [],
+                placeholderSearch: '',
+
+                // Sample data for preview
+                sampleData: {
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    name: 'John Doe',
+                    email: 'john.doe@example.com',
+                    company: 'Tech Corp',
+                    position: 'Software Developer',
+                    date: new Date().toLocaleDateString(),
+                    phone: '+1-555-0123',
+                    address: '123 Main St, City, State',
+                    department: 'Engineering',
+                    manager: 'Jane Smith',
+                    startDate: '2024-01-15'
+                },
+
+                // Bulk email
+                bulkRecipients: [],
+                bulkTemplate: '',
+                bulkCampaignName: '',
+                bulkSchedule: 'now',
+                bulkScheduleTime: '',
+                previewRecipient: '',
+
+                async init() {
+                    this.isLoading = true;
+                    try {
+                        await Promise.all([
+                            this.loadTemplates(),
+                            this.loadPlaceholders()
+                        ]);
+                        this.initQuill();
+                        this.initSampleRecipients();
+                        this.createNewTemplate();
+                    } catch (error) {
+                        console.error('Initialization error:', error);
+                        this.apiError = true;
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                // API Integration
+                async loadTemplates() {
+                    try {
+                        // Mock API call - replace with actual API endpoint
+                        // const response = await fetch('/api/email-templates');
+                        // this.templates = await response.json();
+
+                        // Mock data for demo
+                        this.templates = [
+                            {
+                                id: 'tpl_1',
+                                name: 'Welcome Email',
+                                subject: 'Welcome to ${company}, ${firstName}!',
+                                content: '<h2>Welcome, ${firstName}!</h2><p>We are excited to have you join ${company} as our new ${position}.</p><p>Your start date is ${startDate}.</p>',
+                                category: 'HR',
+                                createdAt: new Date('2024-01-15').toISOString(),
+                                updatedAt: new Date('2024-01-20').toISOString()
+                            },
+                            {
+                                id: 'tpl_2',
+                                name: 'Interview Invitation',
+                                subject: 'Interview Invitation - ${position}',
+                                content: '<h3>Interview Invitation</h3><p>Dear ${firstName},</p><p>We would like to invite you for an interview for the ${position} role at ${company}.</p>',
+                                category: 'Recruitment',
+                                createdAt: new Date('2024-01-10').toISOString(),
+                                updatedAt: new Date('2024-01-18').toISOString()
+                            },
+                            {
+                                id: 'tpl_3',
+                                name: 'Meeting Reminder',
+                                subject: 'Meeting Reminder - ${date}',
+                                content: '<p>Hi ${firstName},</p><p>This is a reminder about our meeting scheduled for ${date}.</p>',
+                                category: 'HR',
+                                createdAt: new Date('2024-01-12').toISOString(),
+                                updatedAt: new Date('2024-01-22').toISOString()
+                            }
+                        ];
+                        this.filterTemplates();
+                    } catch (error) {
+                        console.error('Error loading templates:', error);
+                        this.apiError = true;
+                    }
+                },
+
+                async loadPlaceholders() {
+                    try {
+                        // Mock API call - replace with actual form API endpoint
+                        // const response = await fetch('/api/form-fields');
+                        // const formFields = await response.json();
+
+                        // Mock data for demo
+                        this.placeholders = [
+                            { key: 'firstName', label: '${firstName}', description: 'First name of the recipient' },
+                            { key: 'lastName', label: '${lastName}', description: 'Last name of the recipient' },
+                            { key: 'name', label: '${name}', description: 'Full name of the recipient' },
+                            { key: 'email', label: '${email}', description: 'Email address of the recipient' },
+                            { key: 'company', label: '${company}', description: 'Company name' },
+                            { key: 'position', label: '${position}', description: 'Job position' },
+                            { key: 'date', label: '${date}', description: 'Current date' },
+                            { key: 'phone', label: '${phone}', description: 'Phone number' },
+                            { key: 'address', label: '${address}', description: 'Address' },
+                            { key: 'department', label: '${department}', description: 'Department' },
+                            { key: 'manager', label: '${manager}', description: 'Manager name' },
+                            { key: 'startDate', label: '${startDate}', description: 'Start date' },
+                            { key: 'salary', label: '${salary}', description: 'Salary amount' },
+                            { key: 'employeeId', label: '${employeeId}', description: 'Employee ID' },
+                            { key: 'workLocation', label: '${workLocation}', description: 'Work location' }
+                        ];
+                    } catch (error) {
+                        console.error('Error loading placeholders:', error);
+                        this.apiError = true;
+                    }
+                },
+
+                async saveTemplate() {
+                    if (!this.currentTemplate.name.trim()) {
+                        this.showSaveModal = true;
+                        return;
+                    }
+
+                    this.isLoading = true;
+                    try {
+                        // Sync content from Quill editor if in WYSIWYG mode
+                        if (this.editorMode === 'wysiwyg' && this.quill) {
+                            this.currentTemplate.content = this.quill.root.innerHTML;
+                        }
+
+                        const templateData = {
+                            ...this.currentTemplate,
+                            updatedAt: new Date().toISOString()
+                        };
+
+                        if (this.currentTemplate.id) {
+                            // Update existing template
+                            // await fetch(`/api/email-templates/${this.currentTemplate.id}`, {
+                            //     method: 'PUT',
+                            //     headers: { 'Content-Type': 'application/json' },
+                            //     body: JSON.stringify(templateData)
+                            // });
+
+                            const index = this.templates.findIndex(t => t.id === this.currentTemplate.id);
+                            if (index !== -1) {
+                                this.templates[index] = templateData;
+                            }
+                        } else {
+                            // Create new template
+                            templateData.id = 'tpl_' + Date.now();
+                            templateData.createdAt = new Date().toISOString();
+
+                            // await fetch('/api/email-templates', {
+                            //     method: 'POST',
+                            //     headers: { 'Content-Type': 'application/json' },
+                            //     body: JSON.stringify(templateData)
+                            // });
+
+                            this.templates.push(templateData);
+                            this.currentTemplate.id = templateData.id;
+                        }
+
+                        this.filterTemplates();
+                        this.showNotification('Template saved successfully!', 'success');
+                    } catch (error) {
+                        console.error('Error saving template:', error);
+                        this.showNotification('Error saving template', 'error');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                async deleteTemplate(templateId) {
+                    if (!confirm('Are you sure you want to delete this template?')) return;
+
+                    this.isLoading = true;
+                    try {
+                        // await fetch(`/api/email-templates/${templateId}`, { method: 'DELETE' });
+
+                        this.templates = this.templates.filter(t => t.id !== templateId);
+                        this.filterTemplates();
+
+                        if (this.selectedTemplate?.id === templateId) {
+                            this.createNewTemplate();
+                        }
+
+                        this.showNotification('Template deleted successfully!', 'success');
+                    } catch (error) {
+                        console.error('Error deleting template:', error);
+                        this.showNotification('Error deleting template', 'error');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                // Template Management
+                createNewTemplate() {
+                    this.currentTemplate = {
+                        id: null,
+                        name: '',
+                        subject: '',
+                        content: '<p>Start typing your email content here...</p>',
+                        category: 'HR',
+                        signature: '',
+                        isActive: true
+                    };
+                    this.selectedTemplate = null;
+                    this.updateQuillContent();
+                    this.updatePreview();
+                },
+
+                selectTemplate(template) {
+                    this.selectedTemplate = template;
+                    this.currentTemplate = { ...template };
+                    this.updateQuillContent();
+                    this.updatePreview();
+                },
+
+                editTemplate(template) {
+                    this.selectTemplate(template);
+                },
+
+                cloneTemplate(template) {
+                    this.currentTemplate = {
+                        ...template,
+                        id: null,
+                        name: template.name + ' (Copy)',
+                        createdAt: null,
+                        updatedAt: null
+                    };
+                    this.selectedTemplate = null;
+                    this.updateQuillContent();
+                    this.updatePreview();
+                },
+
+                filterTemplates() {
+                    let filtered = [...this.templates];
+
+                    if (this.selectedModule) {
+                        filtered = filtered.filter(t => t.category === this.selectedModule);
+                    }
+
+                    if (this.templateSearch.trim()) {
+                        const search = this.templateSearch.toLowerCase();
+                        filtered = filtered.filter(t =>
+                            t.name.toLowerCase().includes(search) ||
+                            t.subject.toLowerCase().includes(search) ||
+                            t.content.toLowerCase().includes(search)
+                        );
+                    }
+
+                    this.filteredTemplates = filtered.sort((a, b) =>
+                        new Date(b.updatedAt) - new Date(a.updatedAt)
+                    );
+                },
+
+                // Editor Management
+                initQuill() {
+                    if (this.quill) {
+                        this.quill = null;
+                    }
+
+                    this.quill = new Quill('#quill-editor', {
+                        theme: 'snow',
+                        placeholder: 'Start typing your email content...',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline', 'strike'],
+                                ['blockquote', 'code-block'],
+                                [{ 'header': 1 }, { 'header': 2 }],
+                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                [{ 'script': 'sub' }, { 'script': 'super' }],
+                                [{ 'indent': '-1' }, { 'indent': '+1' }],
+                                [{ 'direction': 'rtl' }],
+                                [{ 'size': ['small', false, 'large', 'huge'] }],
+                                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                [{ 'color': [] }, { 'background': [] }],
+                                [{ 'font': [] }],
+                                [{ 'align': [] }],
+                                ['link', 'image'],
+                                ['clean']
+                            ]
+                        }
+                    });
+
+                    this.quill.on('text-change', () => {
+                        this.currentTemplate.content = this.quill.root.innerHTML;
+                        this.updatePreview();
+                    });
+
+                    this.updateQuillContent();
+                },
+
+                switchEditorMode(mode) {
+                    if (this.editorMode === 'wysiwyg' && this.quill) {
+                        this.currentTemplate.content = this.quill.root.innerHTML;
+                    }
+
+                    this.editorMode = mode;
+
+                    if (mode === 'wysiwyg') {
+                        this.$nextTick(() => {
+                            this.initQuill();
+                        });
+                    }
+
+                    this.updatePreview();
+                },
+
+                updateQuillContent() {
+                    if (this.quill && this.editorMode === 'wysiwyg') {
+                        this.quill.root.innerHTML = this.currentTemplate.content || '<p>Start typing your email content...</p>';
+                    }
+                },
+
+                // Placeholder Management
+                get filteredPlaceholders() {
+                    if (!this.placeholderSearch.trim()) {
+                        return this.placeholders;
+                    }
+
+                    const search = this.placeholderSearch.toLowerCase();
+                    return this.placeholders.filter(p =>
+                        p.label.toLowerCase().includes(search) ||
+                        p.description.toLowerCase().includes(search)
+                    );
+                },
+
+                insertPlaceholder(placeholder) {
+                    if (this.editorMode === 'wysiwyg' && this.quill) {
+                        const range = this.quill.getSelection(true);
+                        this.quill.insertText(range.index, placeholder.label);
+                        this.quill.setSelection(range.index + placeholder.label.length);
+                    } else {
+                        // Insert into HTML textarea
+                        const textarea = document.querySelector('textarea');
+                        if (textarea) {
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const text = textarea.value;
+
+                            textarea.value = text.substring(0, start) + placeholder.label + text.substring(end);
+                            textarea.selectionStart = textarea.selectionEnd = start + placeholder.label.length;
+                            textarea.focus();
+
+                            this.currentTemplate.content = textarea.value;
+                            this.updatePreview();
+                        }
+                    }
+                },
+
+                refreshPlaceholders() {
+                    this.loadPlaceholders();
+                },
+
+                // Preview Management
+                updatePreview() {
+                    const previewElement = document.getElementById('preview-content');
+                    if (previewElement) {
+                        const processedContent = this.replacePlaceholders(this.currentTemplate.content);
+                        previewElement.innerHTML = processedContent;
+                    }
+                },
+
+                replacePlaceholders(content, data = null) {
+                    if (!content) return '';
+
+                    const dataToUse = data || this.sampleData;
+                    let processed = content;
+
+                    Object.keys(dataToUse).forEach(key => {
+                        const placeholder = new RegExp(`\\$\\{${key}\\}`, 'g');
+                        processed = processed.replace(placeholder, dataToUse[key] || '');
+                    });
+
+                    return processed;
+                },
+
+                // Preview and Test Functions
+                previewTemplate() {
+                    if (!this.currentTemplate.content.trim()) {
+                        this.showNotification('Please add content to preview', 'warning');
+                        return;
+                    }
+
+                    const previewWindow = window.open('', '_blank', 'width=800,height=600');
+                    const processedContent = this.replacePlaceholders(this.currentTemplate.content);
+                    const processedSubject = this.replacePlaceholders(this.currentTemplate.subject);
+
+                    previewWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Email Preview: ${processedSubject}</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; margin: 20px; }
+                                .email-header { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+                                .email-content { background: white; padding: 20px; border: 1px solid #dee2e6; border-radius: 5px; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="email-header">
+                                <h3>Email Preview</h3>
+                                <p><strong>Subject:</strong> ${processedSubject}</p>
+                                <p><strong>To:</strong> ${this.sampleData.email}</p>
+                            </div>
+                            <div class="email-content">
+                                ${processedContent}
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                },
+
+                async sendTestEmail() {
+                    if (!this.currentTemplate.content.trim()) {
+                        this.showNotification('Please add content before sending test email', 'warning');
+                        return;
+                    }
+
+                    const testEmail = prompt('Enter test email address:', this.sampleData.email);
+                    if (!testEmail) return;
+
+                    this.isLoading = true;
+                    try {
+                        const emailData = {
+                            to: testEmail,
+                            subject: this.replacePlaceholders(this.currentTemplate.subject),
+                            content: this.replacePlaceholders(this.currentTemplate.content),
+                            isTest: true
+                        };
+
+                        // await fetch('/api/send-email', {
+                        //     method: 'POST',
+                        //     headers: { 'Content-Type': 'application/json' },
+                        //     body: JSON.stringify(emailData)
+                        // });
+
+                        this.showNotification(`Test email sent to ${testEmail}`, 'success');
+                    } catch (error) {
+                        console.error('Error sending test email:', error);
+                        this.showNotification('Error sending test email', 'error');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                // Bulk Email Functions
+                initSampleRecipients() {
+                    this.bulkRecipients = [
+                        {
+                            name: 'John Doe',
+                            email: 'john.doe@example.com',
+                            firstName: 'John',
+                            lastName: 'Doe',
+                            company: 'Tech Corp',
+                            position: 'Developer',
+                            department: 'Engineering'
+                        },
+                        {
+                            name: 'Jane Smith',
+                            email: 'jane.smith@example.com',
+                            firstName: 'Jane',
+                            lastName: 'Smith',
+                            company: 'Design Co',
+                            position: 'Designer',
+                            department: 'Creative'
+                        }
+                    ];
+                },
+
+                addRecipient() {
+                    this.bulkRecipients.push({
+                        name: '',
+                        email: '',
+                        firstName: '',
+                        lastName: '',
+                        company: '',
+                        position: '',
+                        department: ''
+                    });
+                },
+
+                removeRecipient(index) {
+                    this.bulkRecipients.splice(index, 1);
+                    if (this.previewRecipient >= this.bulkRecipients.length) {
+                        this.previewRecipient = '';
+                    }
+                    this.updateBulkPreview();
+                },
+
+                updateBulkPreview() {
+                    if (!this.bulkTemplate || this.previewRecipient === '') return;
+
+                    const template = this.templates.find(t => t.id === this.bulkTemplate);
+                    const recipient = this.bulkRecipients[this.previewRecipient];
+
+                    if (template && recipient) {
+                        const previewElement = document.getElementById('bulk-preview-content');
+                        if (previewElement) {
+                            const processedContent = this.replacePlaceholders(template.content, recipient);
+                            previewElement.innerHTML = processedContent;
+                        }
+                    }
+                },
+
+                getBulkPreviewSubject() {
+                    if (!this.bulkTemplate || this.previewRecipient === '') return '';
+
+                    const template = this.templates.find(t => t.id === this.bulkTemplate);
+                    const recipient = this.bulkRecipients[this.previewRecipient];
+
+                    if (template && recipient) {
+                        return this.replacePlaceholders(template.subject, recipient);
+                    }
+                    return '';
+                },
+
+                getBulkPreviewEmail() {
+                    if (this.previewRecipient === '') return '';
+                    const recipient = this.bulkRecipients[this.previewRecipient];
+                    return recipient ? recipient.email : '';
+                },
+
+                importRecipients() {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.csv';
+                    input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                try {
+                                    const csv = event.target.result;
+                                    const lines = csv.split('\n');
+                                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+
+                                    const newRecipients = [];
+                                    for (let i = 1; i < lines.length; i++) {
+                                        if (lines[i].trim()) {
+                                            const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                                            const recipient = {};
+                                            headers.forEach((header, index) => {
+                                                recipient[header] = values[index] || '';
+                                            });
+                                            newRecipients.push(recipient);
+                                        }
+                                    }
+
+                                    this.bulkRecipients = [...this.bulkRecipients, ...newRecipients];
+                                    this.showNotification(`Imported ${newRecipients.length} recipients`, 'success');
+                                } catch (error) {
+                                    console.error('Error parsing CSV:', error);
+                                    this.showNotification('Error importing CSV file', 'error');
+                                }
+                            };
+                            reader.readAsText(file);
+                        }
+                    };
+                    input.click();
+                },
+
+                async sendBulkEmail() {
+                    if (!this.bulkTemplate || this.bulkRecipients.length === 0) {
+                        this.showNotification('Please select a template and add recipients', 'warning');
+                        return;
+                    }
+
+                    if (!confirm(`Send email to ${this.bulkRecipients.length} recipients?`)) return;
+
+                    this.isLoading = true;
+                    try {
+                        const template = this.templates.find(t => t.id === this.bulkTemplate);
+                        const emailsToSend = this.bulkRecipients.map(recipient => ({
+                            to: recipient.email,
+                            subject: this.replacePlaceholders(template.subject, recipient),
+                            content: this.replacePlaceholders(template.content, recipient),
+                            recipientData: recipient
+                        }));
+
+                        // await fetch('/api/send-bulk-email', {
+                        //     method: 'POST',
+                        //     headers: { 'Content-Type': 'application/json' },
+                        //     body: JSON.stringify({
+                        //         campaignName: this.bulkCampaignName,
+                        //         emails: emailsToSend,
+                        //         schedule: this.bulkSchedule,
+                        //         scheduleTime: this.bulkScheduleTime
+                        //     })
+                        // });
+
+                        this.showNotification(`Bulk email campaign sent to ${this.bulkRecipients.length} recipients!`, 'success');
+                        this.showBulkEmail = false;
+                        this.resetBulkForm();
+                    } catch (error) {
+                        console.error('Error sending bulk email:', error);
+                        this.showNotification('Error sending bulk email campaign', 'error');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                resetBulkForm() {
+                    this.bulkTemplate = '';
+                    this.bulkCampaignName = '';
+                    this.bulkSchedule = 'now';
+                    this.bulkScheduleTime = '';
+                    this.previewRecipient = '';
+                    this.initSampleRecipients();
+                },
+
+                // Modal Functions
+                confirmSave() {
+                    if (!this.currentTemplate.id && this.saveModalName.trim()) {
+                        this.currentTemplate.name = this.saveModalName.trim();
+                    }
+                    this.showSaveModal = false;
+                    this.saveModalName = '';
+                    this.saveTemplate();
+                },
+
+                // Utility Functions
+                formatDate(dateString) {
+                    if (!dateString) return '';
+                    return new Date(dateString).toLocaleDateString();
+                },
+
+                showNotification(message, type = 'info') {
+                    // Create notification element
+                    const notification = document.createElement('div');
+                    notification.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white transition-all duration-300 ${type === 'success' ? 'bg-green-500' :
+                            type === 'error' ? 'bg-red-500' :
+                                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+                        }`;
+                    notification.textContent = message;
+
+                    document.body.appendChild(notification);
+
+                    // Remove after 3 seconds
+                    setTimeout(() => {
+                        notification.style.opacity = '0';
+                        setTimeout(() => {
+                            document.body.removeChild(notification);
+                        }, 300);
+                    }, 3000);
+                }
+            }
+        }
+
+        // Initialize Alpine.js
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('emailTemplateManager', emailTemplateManager);
+        });
+    </script>
+</body>
+
+</html>
